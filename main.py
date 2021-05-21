@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 def main():
     import logging
@@ -10,14 +11,17 @@ def main():
     logger.setLevel(logging.DEBUG)
     logger.info("info")
 
-    analysis_frame_depth = 10 
-    input_frame_size = [600,800]
+    analysis_frame_depth = 5 
+    input_frame_size = [300,400]
 
-    vid = cv2.VideoCapture(0)
+    #vid = cv2.VideoCapture(0)
+    vid = cv2.VideoCapture("materials/v2.h264")
     ret, frame = vid.read()
 
     stacked_frame = np.zeros(input_frame_size,)
     logger.debug(f"0 {stacked_frame.shape}")
+
+    tick = time.time()
 
 
     while(ret):
@@ -32,16 +36,22 @@ def main():
 
         if last_frame_number > analysis_frame_depth:
             np.save("stacked_frame", stacked_frame)
-            logger.debug(stacked_frame.shape)
+            #logger.debug(stacked_frame.shape)
             stacked_frame = stacked_frame[:,:,1:]
-            logger.debug(stacked_frame.shape)
+            #logger.debug(stacked_frame.shape)
 
         sf_var = (np.var(stacked_frame, axis=2))
         sf_var = min_max(sf_var)
         plt.imshow(sf_var)
+        plt.colorbar()
         plt.draw()
         plt.pause(0.0001)
         plt.clf()
+
+        second = time.time() - tick
+        fps = 1.0 / second
+        logger.debug(f"{fps} fps")
+        tick = time.time()
 
         if cv2.waitKey(1)  & 0xFF == ord('q'):
             vid.release()
