@@ -29,18 +29,32 @@ def main():
         cv2.imshow("frame", frame)
 
         if last_frame_number > 100:
-            import pickle 
-            filehandler = open('3d-flow.pkl', 'w') 
-            pickle.dump(stacked_frame, filehandler)
-            break
+            np.save("stacked_frame", stacked_frame)
+            logger.debug(stacked_frame.shape)
+            stacked_frame = stacked_frame[:,:,1:]
+            logger.debug(stacked_frame.shape)
 
+        sf_var = (np.var(stacked_frame, axis=2))
+        #cv2.imshow("sf_var", sf_var)"
+        sf_var = min_max(sf_var)
+        plt.imshow(sf_var)
+        #plt.show()
+        plt.draw()
+        plt.pause(0.0001)
+        plt.clf()
 
-        if cv2.waitKey(100)  & 0xFF == ord('q'):
+        if cv2.waitKey(1)  & 0xFF == ord('q'):
             vid.release()
             ret = False
             break
 
     plt.close()        
+
+def min_max(x, axis=None):
+    min = x.min(axis=axis, keepdims=True)
+    max = x.max(axis=axis, keepdims=True)
+    result = (x-0)/(max-0)
+    return result
 
 
 if __name__ == "__main__":
